@@ -1,9 +1,9 @@
 FLAGS = -O3
 SRC = mummer.cpp qsufsort.c sparseSA.cpp fasta.cpp
 
-all: mummer 
+all: sparsemem
 
-mummer: mummer.o qsufsort.o sparseSA.o fasta.o
+sparsemem: mummer.o qsufsort.o sparseSA.o fasta.o
 	g++ -lpthread $(FLAGS) $^ -o $@
 
 .cpp.o:
@@ -15,12 +15,12 @@ mummer: mummer.o qsufsort.o sparseSA.o fasta.o
 # .PHONY assures clean is exected even if there is a file "./clean" in
 # the directory. The same for doc.
 .PHONY: clean doc
-doc: 
+doc:
 	doxygen
-clean: 
-	rm -f *.o *~ .depend mummer
+clean:
+	rm -f *.o *~ .depend sparsemem
 
-# Create all the dependencies between the source files. 
+# Create all the dependencies between the source files.
 .depend:
 	g++ -MM $(SRC) > .depend
 

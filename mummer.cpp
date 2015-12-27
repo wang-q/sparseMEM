@@ -77,18 +77,18 @@ void *query_thread(void *arg_) {
 	  if(type == MAM) sa->MAM(*P, matches, min_len, print);
 	  else if(type == MUM) sa->MUM(*P, matches, min_len, print);
 	  else if(type == MEM) sa->MEM(*P, matches, min_len, print, num_threads);
-	  if(!print) sa->print_match(meta, matches, false); 
+	  if(!print) sa->print_match(meta, matches, false);
 	  if(rev_comp) {
 	    reverse_complement(*P, nucleotides_only);
 	    if(print) printf("> %s Reverse\n", meta.c_str());
 	    if(type == MAM) sa->MAM(*P, matches, min_len, print);
 	    else if(type == MUM) sa->MUM(*P, matches, min_len, print);
 	    else if(type == MEM) sa->MEM(*P, matches, min_len, print, num_threads);
-	    if(!print) sa->print_match(meta, matches, true); 
+	    if(!print) sa->print_match(meta, matches, true);
 	  }
 	}
 	seq_cnt++;
-        delete P; P = new string; meta = ""; 
+        delete P; P = new string; meta = "";
       }
       start = 1;
       trim(line, start, end);
@@ -122,19 +122,19 @@ void *query_thread(void *arg_) {
       if(type == MAM) sa->MAM(*P, matches, min_len, print);
       else if(type == MUM) sa->MUM(*P, matches, min_len, print);
       else if(type == MEM) sa->MEM(*P, matches, min_len, print, num_threads);
-      if(!print) sa->print_match(meta, matches, false); 
+      if(!print) sa->print_match(meta, matches, false);
       if(rev_comp) {
 	reverse_complement(*P, nucleotides_only);
 	if(print) printf("> %s Reverse\n", meta.c_str());
 	if(type == MAM) sa->MAM(*P, matches, min_len, print);
 	else if(type == MUM) sa->MUM(*P, matches, min_len, print);
 	else if(type == MEM) sa->MEM(*P, matches, min_len, print, num_threads);
-	if(!print) sa->print_match(meta, matches, true); 
+	if(!print) sa->print_match(meta, matches, true);
       }
     }
   }
   delete P;
-  
+
   pthread_exit(NULL);
 }
 
@@ -142,7 +142,7 @@ void *query_thread(void *arg_) {
 int main(int argc, char* argv[]) {
   // Collect parameters from the command line.
   while (1) {
-    static struct option long_options[] = { 
+    static struct option long_options[] = {
       {"l", 1, 0, 0}, // 0
       {"mumreference", 0, 0, 0}, // 1
       {"b", 0, 0, 0}, // 2
@@ -154,18 +154,18 @@ int main(int argc, char* argv[]) {
       {"threads", 1, 0, 0}, // 8
       {"n", 0, 0, 0}, // 9
       {"qthreads", 1, 0, 0}, // 10
-      {0, 0, 0, 0} 
+      {0, 0, 0, 0}
     };
     int longindex = -1;
     int c = getopt_long_only(argc, argv, "", long_options, &longindex);
     if(c == -1) break; // Done parsing flags.
-    else if(c == '?') { // If the user entered junk, let him know. 
+    else if(c == '?') { // If the user entered junk, let him know.
       cerr << "Invalid parameters." << endl;
       usage(argv[0]);
     }
     else {
       // Branch on long options.
-      switch(longindex) { 
+      switch(longindex) {
       case 0: min_len = atol(optarg); break;
       case 1: type = MAM; break;
       case 2: rev_comp = true;	break;
@@ -177,7 +177,7 @@ int main(int argc, char* argv[]) {
       case 8: num_threads = atoi(optarg); break;
       case 9: nucleotides_only = true; break;
       case 10: query_threads = atoi(optarg) ; break;
-      default: break; 
+      default: break;
       }
     }
   }
@@ -186,12 +186,12 @@ int main(int argc, char* argv[]) {
   if(K != 1 && type != MEM) { cerr << "-k option valid only for -maxmatch" << endl; exit(1); }
   if(num_threads <= 0) { cerr << "invalid number of threads specified" << endl; exit(1); }
 
-  string ref_fasta = argv[optind]; 
+  string ref_fasta = argv[optind];
   query_fasta = argv[optind+1];
 
   string ref;
-  
-  vector<string> refdescr; 
+
+  vector<string> refdescr;
   vector<long> startpos;
 
   load_fasta(ref_fasta, ref, refdescr, startpos);
@@ -205,22 +205,22 @@ int main(int argc, char* argv[]) {
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
   vector<query_arg> args(query_threads);
-  vector<pthread_t> thread_ids(query_threads);  
+  vector<pthread_t> thread_ids(query_threads);
 
   // Initialize additional thread data.
-  for(int i = 0; i < query_threads; i++) { 
+  for(int i = 0; i < query_threads; i++) {
     args[i].skip = query_threads;
     args[i].skip0 = i;
   }
 
   // Create joinable threads to find MEMs.
-  for(int i = 0; i < query_threads; i++) 
+  for(int i = 0; i < query_threads; i++)
     pthread_create(&thread_ids[i], &attr, query_thread, (void *)&args[i]);
 
   // Wait for all threads to terminate.
-  for(int i = 0; i < query_threads; i++) 
-    pthread_join(thread_ids[i], NULL);    
-  
+  for(int i = 0; i < query_threads; i++)
+    pthread_join(thread_ids[i], NULL);
+
   delete sa;
 }
 
@@ -247,15 +247,15 @@ void usage(string prog) {
   cerr << endl;
   cerr << "Example usage:" << endl;
   cerr << endl;
-  cerr << "./mummer -maxmatch -l 20 -b -n -k 3 -threads 3 query.fa ref.fa" << endl;
+  cerr << prog << " -maxmatch -l 20 -b -n -k 3 -threads 3 query.fa ref.fa" << endl;
   cerr << "Find all maximal matches on forward and reverse strands" << endl;
   cerr << "of length 20 or greater, matching only a, c, t, or g." << endl;
   cerr << "Index every 3rd position in the ref.fa and use 3 threads to find MEMs." << endl;
   cerr << "Fastest method for one long query sequence." << endl;
   cerr << endl;
-  cerr << "./mummer -maxmatch -l 20 -b -n -k 3 -qthreads 3 query.fa ref.fa" << endl;
+  cerr << prog << " -maxmatch -l 20 -b -n -k 3 -qthreads 3 query.fa ref.fa" << endl;
   cerr << "Same as above, but now use a single thread for every query sequence in" << endl;
   cerr << "query.fa. Fastest for many small query sequences." << endl;
-  
+
   exit(1);
 }
