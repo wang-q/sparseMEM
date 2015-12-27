@@ -1,16 +1,17 @@
-FLAGS = -O3
+CFLAGS = -Wall -O3
+LDFLAGS= -pthread
 SRC = mummer.cpp qsufsort.c sparseSA.cpp fasta.cpp
 
 all: sparsemem
 
 sparsemem: mummer.o qsufsort.o sparseSA.o fasta.o
-	g++ -lpthread $(FLAGS) $^ -o $@
+	g++ $(LDFLAGS) $^ -o $@
 
 .cpp.o:
-	g++ $(FLAGS) -Wall -c $<
+	g++ $(CFLAGS) -c $<
 
 .c.o:
-	gcc $(FLAGS) -Wall -c $<
+	gcc $(CFLAGS) -c $<
 
 # .PHONY assures clean is exected even if there is a file "./clean" in
 # the directory. The same for doc.
